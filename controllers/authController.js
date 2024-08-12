@@ -80,7 +80,36 @@ const loginUser = async (req, res) => {
         success: true,
         message: "User is logged in successfully",
         token: "Bearer " + token,
+        userId: user._id,
     });
+}
+
+
+
+// logout 
+const logoutUser = async (req, res) => {
+    // Get the token from the request headers or body
+    const token = req.headers.authorization || req.body.token;
+
+    try {
+        // Find the user based on the token
+        const user = await User.findOne({ token: token });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid token' });
+        }
+
+        // Clear the token from the user document
+        user.token = '';
+        await user.save();
+
+        res.status(200).json({ message: 'Logout successful' });
+        console.log('token ', token);
+    } catch (error) {
+        console.error('Logout error:', error);
+        console.log('token ', token);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 }
 
 // @desc    Get user profile
@@ -104,5 +133,7 @@ const getUserProfile = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
+    logoutUser,
     getUserProfile,
 };
+

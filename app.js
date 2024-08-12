@@ -15,14 +15,13 @@ require('./config/database');
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(passport.initialize());
 
 
 // Routes
 app.use('/api/auth', authRoutes);
 
 
-app.post('/invoice', async (req, res) => {
+app.post('/free-trial', async (req, res) => {
     try {
         const newInvoice = new Invoice(req.body);
         await newInvoice.save();
@@ -33,9 +32,37 @@ app.post('/invoice', async (req, res) => {
     }
 });
 
+app.post('/invoice', passport.authenticate("jwt", { session: false }), async (req, res) => {
+    try {
+        const invoiceData = {
+            ...req.body,
+            userId: req.user._id,
+        };
+
+        const newInvoice = new Invoice(invoiceData);
+        await newInvoice.save();
+        res.status(201).json(newInvoice);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err });
+    }
+});
+
 app.get('/getInvoice', async (req, res) => {
     try {
         const invoices = await Invoice.find();
+        res.status(200).json(invoices);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error fetching invoices' });
+    }
+});
+
+
+app.get('/invoice/:userId', passport.authenticate("jwt", { session: false }), async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const invoices = await Invoice.find({ userId: userId });
         res.status(200).json(invoices);
     } catch (err) {
         console.error(err);
@@ -58,29 +85,6 @@ app.get("/backend", passport.authenticate("jwt", { session: false }),
 
 
 
-// logout 
-app.post('/logout', async (req, res) => {
-    // Get the token from the request headers or body
-    const token = req.headers.authorization || req.body.token;
-
-    try {
-        // Find the user based on the token
-        const user = await User.findOne({ token: token });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid token' });
-        }
-
-        // Clear the token from the user document
-        user.token = '';
-        await user.save();
-
-        res.status(200).json({ message: 'Logout successful' });
-    } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
 
 
 
