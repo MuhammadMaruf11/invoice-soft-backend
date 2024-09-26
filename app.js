@@ -16,12 +16,27 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Initial route
+app.get('/', (req, res) => {
+    res.json({ message: 'Welcome to the Invoice Software API' });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
 
 
 app.post('/free-trial', async (req, res) => {
+    try {
+        const newInvoice = new Invoice(req.body);
+        await newInvoice.save();
+        res.status(201).json(newInvoice);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error creating invoice' });
+    }
+});
+
+app.post('/create-invoice', passport.authenticate("jwt", { session: false }), async (req, res) => {
     try {
         const newInvoice = new Invoice(req.body);
         await newInvoice.save();
@@ -61,6 +76,7 @@ app.get('/getInvoice', async (req, res) => {
 
 app.get('/invoice/:userId', passport.authenticate("jwt", { session: false }), async (req, res) => {
     const { userId } = req.params;
+
     try {
         const invoices = await Invoice.find({ userId: userId });
         res.status(200).json(invoices);

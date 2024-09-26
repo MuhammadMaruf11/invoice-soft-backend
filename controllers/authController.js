@@ -104,7 +104,6 @@ const logoutUser = async (req, res) => {
         await user.save();
 
         res.status(200).json({ message: 'Logout successful' });
-        console.log('token ', token);
     } catch (error) {
         console.error('Logout error:', error);
         console.log('token ', token);
