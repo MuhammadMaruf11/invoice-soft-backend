@@ -2,9 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const passport = require('passport');
-require('./config/passport')
+require('./config/userPassport')
 
 const authRoutes = require('./routes/authRoutes');
+const adminAuthRoutes = require('./routes/adminAuthRoutes');
+const allUsersRoutes = require('./routes/allUsersRoutes');
 
 const User = require('./models/User');
 const Invoice = require('./models/Invoice');
@@ -23,6 +25,8 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/adminAuth', adminAuthRoutes);
+app.use('/api/allUsers', allUsersRoutes);
 
 
 app.post('/free-trial', async (req, res) => {
