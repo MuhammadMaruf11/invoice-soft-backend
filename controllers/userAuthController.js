@@ -5,9 +5,7 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 10;
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
+
 const registerUser = async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
@@ -48,9 +46,7 @@ const registerUser = async (req, res) => {
 }
 
 
-// @desc    Authenticate user & get token
-// @route   POST /api/auth/login
-// @access  Public
+
 const loginUser = async (req, res) => {
     const user = await User.findOne({ username: req.body.username });
     if (!user) {
@@ -111,12 +107,9 @@ const logoutUser = async (req, res) => {
     }
 }
 
-// @desc    Get user profile
-// @route   GET /api/auth/profile
-// @access  Private
+
 const getUserProfile = async (req, res) => {
     const user = await User.findById(req.user.id);
-
     if (user) {
         res.json({
             _id: user._id,
@@ -128,6 +121,7 @@ const getUserProfile = async (req, res) => {
         res.status(404).json({ message: 'User not found' });
     }
 };
+
 
 module.exports = {
     registerUser,
