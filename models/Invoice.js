@@ -4,7 +4,10 @@ const invoiceSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: function () {
+            // 'userId' is required if 'isFreeTrial' is not true
+            return !this.isFreeTrial;
+        },
     },
     customerName: {
         type: String,
@@ -60,6 +63,10 @@ const invoiceSchema = new mongoose.Schema({
     delivery: {
         type: String,
     },
-});
+    isFreeTrial: {
+        type: Boolean,
+        default: false,
+    },
+}, { timestamps: true });
 
 module.exports = mongoose.model('Invoice', invoiceSchema);

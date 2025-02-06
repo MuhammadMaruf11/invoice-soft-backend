@@ -5,19 +5,42 @@ const saltRounds = 10;
 
 const getAllUsers = async (req, res, next) => {
     try {
-        // Fetch all users from the database, excluding passwords
-        const users = await User.find().select("-password");
+        // Extract page and limit from query parameters, with defaults for initial values
+        const page = parseInt(req.query.page) || 1; // Default to page 1
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+
+        // Calculate the skip value based on page and limit
+        const skip = (page - 1) * limit;
+
+        // Fetch the users with pagination and excluding the password field
+        const users = await User.find().select("-password").skip(skip).limit(limit);
+
+        // Get the total number of users for pagination calculation
+        const totalUsers = await User.countDocuments();
+
+        // Calculate the total number of pages
+        const totalPages = Math.ceil(totalUsers / limit);
 
         if (!users || users.length === 0) {
             return res.status(404).json({ success: false, message: "No users found" });
         }
 
-        return res.status(200).json({ success: true, users });
+        return res.status(200).json({
+            success: true,
+            users,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalUsers,
+                limit,
+            },
+        });
     } catch (error) {
         console.error("Error fetching users:", error);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
+
 
 
 const createUser = async (req, res, next) => {
