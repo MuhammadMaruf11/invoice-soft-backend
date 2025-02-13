@@ -22,7 +22,7 @@ const getAllUsers = async (req, res, next) => {
         const totalPages = Math.ceil(totalUsers / limit);
 
         if (!users || users.length === 0) {
-            return res.status(404).json({ success: false, message: "No users found" });
+            return res.status(403).json({ success: false, message: "No users found" });
         }
 
         return res.status(200).json({
